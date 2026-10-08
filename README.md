@@ -22,7 +22,7 @@ Browser tests use system Chromium at `/usr/bin/chromium`. On other machines, ins
 - Select UP / DOWN / LEFT / RIGHT on the racket handle, or use keyboard arrows, then click HIT or press Space.
 - A collision with the right edge gives +15, left −15, top +5, bottom −5. Corner collisions combine both edges. Only real collisions score.
 - 0–2 cups: grey ball, low power and imprecise aim. 3 cups: green ball, faster. 4–6 cups: green ball, strong bounce and accurate aim. 7–9 cups: pink ball, jitter, unpredictable directions and a bias toward penalties. The interface becomes pinker as caffeine increases.
-- Every 12 HITs, Coffee Break pauses gameplay, blurs the background and locks other controls. Coffee adds a cup; NO preserves the cup count.
+- Coffee Break comes after 12 HITs at 0–5 cups, 6 HITs at 6–7 cups, and 3 HITs at 8–9 cups. It pauses gameplay, blurs the background and locks other controls. Coffee adds a cup; NO preserves the cup count.
 - Five hits within 1.1 seconds trigger Stir × Spin. Tennis feedback uses uploaded Chalkduster, random colors and positions, and pop/fade effects. Coffee choices never trigger shot praise. Break Point appears only inside Coffee Break.
 
 ## Three endings
