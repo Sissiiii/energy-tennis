@@ -7,6 +7,9 @@ let aim='right',scoreTimer,lastSpot=-1,lastColor=-1,welcome=true,lastMode=null,r
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function resize(){const r=court.getBoundingClientRect(),oldW=w||r.width,oldH=h||r.height;w=r.width;h=r.height;radius=Math.max(27,Math.min(60,w*.045));ball.style.width=ball.style.height=radius*2+'px';x=Math.max(30,Math.min(w-30,x*w/oldW));y=Math.max(50,Math.min(h-100,y*h/oldH));const d=Math.min(devicePixelRatio||1,2);canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0)}
 new ResizeObserver(resize).observe(court);
+function fitFrame(){const main=document.querySelector('main'),style=getComputedStyle(main),intro=document.querySelector('.intro'),controls=document.querySelector('.controls');const outerHeight=el=>{const css=getComputedStyle(el);return el.offsetHeight+parseFloat(css.marginTop)+parseFloat(css.marginBottom)};const availableHeight=window.innerHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom)-outerHeight(intro)-outerHeight(controls);const availableWidth=main.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);const width=Math.max(1,Math.min(1500,availableWidth,availableHeight*1366/768));main.style.setProperty('--frame-width',width+'px')}
+window.addEventListener('resize',fitFrame);new ResizeObserver(fitFrame).observe(document.querySelector('.intro'));new ResizeObserver(fitFrame).observe(document.querySelector('.controls'));document.fonts.ready.then(fitFrame);fitFrame();
+
 function sync(){
  const s=game.stage,mode=welcome?'welcome':game.mode;document.body.dataset.mode=mode;
  const overlay=$('overlay'),parent=mode==='break'?document.body:court;if(overlay.parentElement!==parent)parent.append(overlay);
