@@ -46,3 +46,11 @@ main{height:100dvh;min-height:0;justify-content:center;align-items:center;paddin
 .intro,.game-shell,.controls{width:var(--frame-width,100%);max-width:100%;flex-shrink:0}
 .intro{margin:0 0 16px}.controls{margin:12px 0 0}.game-shell{height:auto;min-height:0;max-height:none;aspect-ratio:1366/768;margin:0}
 @media(max-width:700px){main{padding:12px 8px}.intro{margin-bottom:12px}.controls{margin-top:10px}}
+/* Three distinct endings: zero points, perfect warm-up, caffeine overload. */
+body[data-mode="ending"] .controls,body[data-mode="over"] .controls{pointer-events:none;visibility:hidden}
+body[data-mode="ending"][data-outcome="caffeine"] main{animation:caffeine-dizzy 2.2s ease-in-out both;transform-origin:center;pointer-events:none}
+@keyframes caffeine-dizzy{0%{transform:rotate(0) scale(1);filter:blur(0)}20%{transform:rotate(-3deg) scale(1.04);filter:blur(1px)}45%{transform:rotate(4deg) scale(1.07);filter:blur(3px)}65%{transform:rotate(-5deg) scale(1.1);filter:blur(5px)}85%{transform:rotate(2deg) scale(1.06);filter:blur(8px);opacity:.6}100%{transform:rotate(0);filter:blur(10px);opacity:0}}
+body[data-mode="over"][data-outcome="caffeine"],body[data-outcome="caffeine"] .game-over,body[data-outcome="caffeine"] .game-over .overlay{background:#000;color:#edb3f4}
+body[data-outcome="perfect"] .game-over,body[data-outcome="perfect"] .game-over .overlay{background:#82a59b;color:#bbf76d}
+body[data-outcome="love"] .game-over,body[data-outcome="love"] .game-over .overlay{background:#677577;color:#f442eb}
+@media(prefers-reduced-motion:reduce){body[data-mode="ending"][data-outcome="caffeine"] main{animation:none;opacity:.35;filter:blur(2px)}}
