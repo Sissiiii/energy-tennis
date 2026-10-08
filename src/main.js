@@ -1,4 +1,4 @@
-import {Game,terms} from './game.js';
+import {Game,shotFeedback} from './game.js';
 import {stepBall,launchBall,chaosVelocity} from './physics.js';
 const $=id=>document.getElementById(id), game=new Game(), court=$('court'), ball=$('ball'), canvas=$('effects'),ctx=canvas.getContext('2d');
 const cup='<img src="/assets/coffee.svg" alt="">';
@@ -27,21 +27,22 @@ function sync(){
 }
 $('start-button').onclick=()=>{welcome=false;sync()};
 
-function call(text){
- clearTimeout(callTimer);const el=$('callout');el.classList.remove('pop');el.textContent=text;
+function call(text,sleepy=false){
+ clearTimeout(callTimer);const el=$('callout');el.classList.remove('pop');el.classList.toggle('sleepy',sleepy);el.textContent=text;
  const spots=[[.28,.2],[.72,.22],[.5,.37],[.3,.5],[.7,.5]],colors=['#edb3f4','#f9dc80','#bbf76d','#ffffff','#ff29d7'];
  const pick=(length,previous)=>(previous+1+Math.floor(Math.random()*(length-1)))%length;
  lastSpot=pick(spots.length,lastSpot);lastColor=pick(colors.length,lastColor);
  let size=Math.min(58,Math.max(16,w*.052));ctx.save();ctx.font=`${size}px Chalkduster`;size*=Math.min(1,w*.83/ctx.measureText(text).width);ctx.restore();el.style.fontSize=size+'px';
- el.style.color=colors[lastColor];el.style.setProperty('--tilt',(Math.random()*12-6)+'deg');
+ el.style.color=sleepy?['#dfe6e2','#bacfc5','#d0ddcf','#f0f2e9','#becbc8'][lastColor]:colors[lastColor];el.style.setProperty('--tilt',(Math.random()*12-6)+'deg');
  el.style.left=spots[lastSpot][0]*100+'%';el.style.top=spots[lastSpot][1]*100+'%';
  const half=Math.min(w*.86,el.offsetWidth)/2;el.style.left=Math.max(half+8,Math.min(w-half-8,w*spots[lastSpot][0]))+'px';
- void el.offsetWidth;el.classList.add('pop');callTimer=setTimeout(()=>el.classList.remove('pop'),1600);
+ void el.offsetWidth;el.classList.add('pop');callTimer=setTimeout(()=>el.classList.remove('pop'),sleepy?2000:1600);
 }
 
 function emit(kind,count=14){for(let i=0;i<count;i++){particles.push({kind,x:Math.random()*w,y:kind==='heart'?-20:Math.random()*h*.5,vx:(Math.random()-.5)*60,vy:60+Math.random()*90,life:3+Math.random()*2,size:10+Math.random()*17,rot:Math.random()*6})}particles=particles.slice(-100)}
+function emitSleep(){for(let i=0;i<2;i++)particles.push({kind:'sleep',x:Math.max(15,Math.min(w-30,x+radius*.4+i*15)),y:Math.max(35,y-radius*.7-i*12),vx:8+i*3,vy:-18-i*5,life:2,size:16+i*6,rot:0});particles=particles.slice(-40)}
 function choose(coffee){const opening=game.mode==='start';if(welcome||!game.choose(coffee))return;clearTimeout(callTimer);$('callout').classList.remove('pop');$('callout').textContent='';if(opening){x=w*.3;y=h*.36}sync()}
-function hit(){const result=game.hit(performance.now());if(!result)return;if(result==='break'){vx=vy=0;sync();return;}({vx,vy}=launchBall(aim,game.cups));rotation+=35;$('hit').classList.remove('pressed');void $('hit').offsetWidth;$('hit').classList.add('pressed');if(game.cups>=3&&game.cups<=4)emit('star');if(result==='spin'){call('Stir × Spin');vx*=1.3;vy*=1.3}else if(result==='break'){vx=vy=0;}else if(result==='hit'&&game.hits%3===0)call(terms[Math.floor(Math.random()*terms.length)]);sync()}
+function hit(){const result=game.hit(performance.now());if(!result)return;if(result==='break'){vx=vy=0;sync();return;}({vx,vy}=launchBall(aim,game.cups));rotation+=35;$('hit').classList.remove('pressed');void $('hit').offsetWidth;$('hit').classList.add('pressed');if(game.cups>=3&&game.cups<=4)emit('star');if(result==='spin'){vx*=1.3;vy*=1.3}if(game.cups<=2){emitSleep();if(game.hits===1||game.hits%3===0||result==='spin')call(shotFeedback(game.cups),true)}else if(result==='spin'){call('Stir × Spin')}else if(result==='hit'&&game.hits%3===0)call(shotFeedback(game.cups));sync()}
 $('coffee-choice').onclick=()=>choose(true);$('no-choice').onclick=()=>choose(false);$('hit').onclick=hit;
 function reset(){clearTimeout(endingTimer);welcome=true;aim='right';document.querySelectorAll('[data-direction]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.direction===aim)));clearTimeout(scoreTimer);$('score-flash').classList.remove('active');lastSpot=lastColor=-1;$('love').classList.remove('love-pulse');game.reset();vx=vy=0;particles=[];trail=[];clearTimeout(callTimer);$('callout').classList.remove('pop');sync()}
 $('reset').onclick=reset;$('restart').onclick=reset;$('rules-button').onclick=()=>$('rules').showModal();$('close-rules').onclick=()=>$('rules').close();
@@ -54,7 +55,7 @@ function frame(now){const dt=Math.min((now-last)/1000,.035);last=now;ctx.clearRe
 if(game.cups>=7&&chaosTimer>.16&&Math.hypot(vx,vy)>1){({vx,vy}=chaosVelocity(vx,vy,game.cups));chaosTimer=0}
 const next=stepBall({x,y,vx,vy,radius,w,h},dt,game.cups);({x,y,vx,vy}=next);recordEdges(next.edges);rotation+=Math.hypot(vx,vy)*dt*(game.cups>=7?.8:.25);const jitter=game.cups>=7&&!reduced?(Math.random()-.5)*(game.cups-6)*10:0;const drawX=Math.max(radius,Math.min(w-radius,x+jitter)),drawY=Math.max(radius,Math.min(h-radius,y-jitter));ball.style.transform=`translate(${drawX-radius}px,${drawY-radius}px) rotate(${rotation}deg)`;if(!reduced&&Math.hypot(vx,vy)>100){trail.push({x,y});if(trail.length>9)trail.shift();trail.forEach((p,i)=>{ctx.beginPath();ctx.fillStyle=game.stage.color;ctx.globalAlpha=i/trail.length*.16;ctx.arc(p.x,p.y,radius*.45+i,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1}else trail=[];
 }
-particles=particles.filter(p=>p.life>0);if(!reduced)for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;ctx.save();ctx.globalAlpha=Math.min(1,p.life);ctx.translate(p.x,p.y);ctx.rotate(Math.sin(now/900+p.rot)*.3);ctx.fillStyle=p.kind==='heart'?'#f442eb':'#f9dc80';ctx.font=`${p.size}px Chalkduster`;ctx.fillText(p.kind==='heart'?'♥':'✦',0,0);ctx.restore()}else particles=[];requestAnimationFrame(frame)}
+particles=particles.filter(p=>p.life>0);if(!reduced)for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;ctx.save();ctx.globalAlpha=Math.min(1,p.life);ctx.translate(p.x,p.y);ctx.rotate(Math.sin(now/900+p.rot)*.3);ctx.fillStyle=p.kind==='heart'?'#f442eb':p.kind==='sleep'?'#e4e9e1':'#f9dc80';ctx.font=`${p.size}px Chalkduster`;ctx.fillText(p.kind==='heart'?'♥':p.kind==='sleep'?'z':'✦',0,0);ctx.restore()}else particles=[];requestAnimationFrame(frame)}
 sync();requestAnimationFrame(frame);
 
 export {game};

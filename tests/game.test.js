@@ -16,3 +16,6 @@ test('penalties clamp at zero and only actual shots can trigger LOVE',()=>{const
 test('1000 points ends in a perfect warm-up and cannot score further',()=>{const g=new Game();g.choose(false);g.hit(1000);for(let i=0;i<67;i++)g.scoreEdges(['right']);assert.equal(g.score,1000);assert.equal(g.bestScore,1000);assert.equal(g.outcome,'perfect');assert.equal(g.mode,'over');g.scoreEdges(['left']);assert.equal(g.score,1000);assert.equal(g.hit(2000),null)});
 
 test('later coffee choices arrive sooner and NO restarts the same interval',()=>{for(const [cups,interval] of [[0,12],[5,12],[6,6],[7,6],[8,3],[9,3]]){const g=new Game();g.cups=cups;g.choose(false);assert.equal(g.breakEvery,interval);for(let i=0;i<interval-1;i++){g.hit(i*1200);assert.equal(g.mode,'play')}assert.equal(g.hit(interval*1200),'break');g.choose(false);assert.equal(g.cups,cups);assert.equal(g.sinceBreak,0);assert.equal(g.breakEvery,interval)}});
+
+import {shotFeedback,sleepyTerms,terms} from '../src/game.js';
+test('grey stages only show sleepy feedback; green and pink stages use tennis terms',()=>{for(const cups of [0,1,2])for(const r of [0,.3,.6,.99]){const word=shotFeedback(cups,()=>r);assert.ok(sleepyTerms.includes(word));assert.ok(!terms.includes(word))}for(const cups of [3,6,9])assert.ok(terms.includes(shotFeedback(cups,()=>0)))});

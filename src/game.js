@@ -1,3 +1,4 @@
+export const sleepyTerms = ['zzz…', 'Yawn…', 'Still waking up…', 'Need a nap…'];
 export const terms = ['Nice Shot !!!!!', 'Ace!', 'Advantage', 'Deuce!', 'Match Point', 'Game, Set, Sip!'];
 export const stages = [
  {max:0,label:'NO CAFFEINE',copy:'',color:'#e0e2e0',speed:140,drag:1.3},
@@ -18,3 +19,5 @@ export class Game {
  choose(coffee){if(!['start','break'].includes(this.mode))return false;if(coffee)this.cups=Math.min(10,this.cups+1);this.sinceBreak=0;this.mode='play';if(this.cups===10)this.finish('caffeine');return true}
  hit(now){if(this.mode!=='play')return null;this.hits++;this.sinceBreak++;this.recent=this.recent.filter(t=>now-t<1100);this.recent.push(now);const spin=this.recent.length>=5;if(this.cups<10&&this.sinceBreak>=this.breakEvery){this.mode='break';return 'break'}return spin?'spin':'hit'}
 }
+
+export function shotFeedback(cups,random=Math.random){const options=cups<=2?sleepyTerms:terms;return options[Math.floor(random()*options.length)]}

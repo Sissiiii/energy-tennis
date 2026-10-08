@@ -54,3 +54,7 @@ body[data-mode="over"][data-outcome="caffeine"],body[data-outcome="caffeine"] .g
 body[data-outcome="perfect"] .game-over,body[data-outcome="perfect"] .game-over .overlay{background:#82a59b;color:#bbf76d}
 body[data-outcome="love"] .game-over,body[data-outcome="love"] .game-over .overlay{background:#677577;color:#f442eb}
 @media(prefers-reduced-motion:reduce){body[data-mode="ending"][data-outcome="caffeine"] main{animation:none;opacity:.35;filter:blur(2px)}}
+
+#callout.sleepy.pop{animation:sleepy-pop 2s ease-out both}
+@keyframes sleepy-pop{0%{opacity:0;transform:translate(-50%,-35%) rotate(-4deg) scale(.92)}20%,65%{opacity:.8;transform:translate(-50%,-50%) rotate(2deg) scale(1)}100%{opacity:0;transform:translate(-50%,-85%) rotate(-2deg) scale(.97)}}
+@media(prefers-reduced-motion:reduce){#callout.sleepy.pop{animation:none;opacity:.8}}
